@@ -106,7 +106,7 @@ int main() {
       presioneTeclaParaContinuar();
   
     } while (opcion != '6');
-    cleanList(Tickets);
+    cleanList(Tickets); // prueba numero 1
   
     return 0;
 }
