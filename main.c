@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "list.h"
 
-//codigo para ejecutar el programa .gcc -o tarea1 main.c list.c 
+//codigo para ejecutar el programa.    gcc -o tarea1 main.c list.c 
 typedef struct{
     int ID;
     int rut;
@@ -35,6 +36,18 @@ puts("5) Mostrar Tickets por prioridad");
 puts("6) Salir");
 }  
 
+void obtenerHoraActual(char *hora) {
+  time_t t;
+  struct tm *tm_info;
+
+  // Obtiene el tiempo actual
+  time(&t);
+  tm_info = localtime(&t);
+
+  // Formatea la hora en formato HH:MM
+  strftime(hora, 6, "%H:%M", tm_info);
+}
+
 void registrar_paciente(List *tickets) {
     tipoTicket *auxiliar = malloc(sizeof(tipoTicket));
     if (auxiliar == NULL) {
@@ -49,9 +62,7 @@ void registrar_paciente(List *tickets) {
     printf("Ingresar nombre del cliente: ");
     scanf(" %s", auxiliar->name);
     getchar();
-    printf("Ingresar Hora de Registro: ");
-    scanf(" %s", auxiliar->hora);
-    getchar();
+    obtenerHoraActual(auxiliar->hora);
     auxiliar->prioridad = 0;
     strcpy(auxiliar->Estado, "Pendiente"); 
     push_back(tickets, auxiliar);
@@ -72,7 +83,30 @@ void mostrar_lista_pacientes(List *tickets) {
         }
     }
 }
-  
+
+void modificar_ticket(List *tickets) {
+    if (list_firts(tickets) == NULL) {
+        printf("No hay pacientes en espera.\n");
+        return;
+    }
+    else{
+        int idTicket;
+        printf("Ingrese el ID del ticket a modificar: ");
+        scanf(" %d", &idTicket);
+        tipoTicket *actual = list_firts(tickets);
+        while (actual != NULL) {
+            if (actual->ID == idTicket) {
+                printf("Modificar Ticket ID: %d\n", actual->ID);
+                printf("Ingresar nueva prioridad: ");
+                scanf(" %d", &actual->prioridad);
+                break;
+            }
+            actual = list_next(tickets);
+        }
+    }
+}
+
+
 int main() {
     char opcion;
     List *Tickets = create_List();
@@ -86,6 +120,7 @@ int main() {
         registrar_paciente(Tickets);
         break;
       case '2':
+        modificar_ticket(Tickets); 
         // Lógica para asignar prioridad
         break;
       case '3':

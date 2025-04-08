@@ -46,7 +46,16 @@ void * list_next(List *list) {
     if (list == NULL || list->current == NULL || list->current->next == NULL) return NULL; 
     list->current = list->current->next;
     return list->current->ticket;
-  }
+}
+
+void * list_prev(List *list){
+    if (list->current == NULL) return NULL;
+    if(list->current->prev != NULL){
+        list->current = list->current->prev;
+        return list->current->ticket;    
+    }
+    return NULL;
+}
 
 void * push_back(List * list, void * ticket){
     list->current = list->tail;
@@ -88,11 +97,38 @@ void * push_current(List * list, void * ticket){
 }
 
 void *pop_front(List *list) {
-    if (list->head == NULL) return NULL; 
-    Node *temp = list->head;
-    list->head = list->head->next;
-    if (list->head == NULL) list->tail = NULL;
-    free(temp);
+    list->current = list->tail;
+    return pop_current(list);
+}
+
+void *pop_back(List *list) {
+    list->current = list->tail;
+    return pop_current(list);
+}
+
+void *pop_current(List *list) {
+    if (list->head == NULL) return NULL;
+    void * ticket = list->current->ticket;
+    Node *nodo_eliminar = list->current;
+    if (list->current == list->head){
+        list->head = list->head->next;
+        list->current = list->head;
+        list->head->prev = NULL;
+    }
+    else if (list->current == list->tail){
+        list->tail = list->tail->prev;
+        list->current = list->tail;
+        list->tail->next = NULL;
+    }
+    else{
+        Node * izq = list->current->prev;
+        Node * der = list->current->next;
+        izq->next = der;
+        der->prev = izq;
+        list->current = der;
+    }
+    free(nodo_eliminar);
+    return ticket;
 }
 
 void  cleanList(List * list) {
