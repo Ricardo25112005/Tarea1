@@ -63,7 +63,7 @@ void registrar_paciente(List *tickets) {
     scanf(" %s", auxiliar->name);
     getchar();
     obtenerHoraActual(auxiliar->hora);
-    auxiliar->prioridad = 0;
+    auxiliar->prioridad = 1;
     strcpy(auxiliar->Estado, "Pendiente"); 
     push_back(tickets, auxiliar);
     // Aquí implementarías la lógica para registrar un nuevo paciente
@@ -78,13 +78,62 @@ void mostrar_lista_pacientes(List *tickets) {
         printf("Pacientes en espera: \n");
         tipoTicket *actual = list_firts(tickets);
         while (actual != NULL) {
-        if (strcmp(actual->Estado,"Pendiente") == 0)printf("ID: %d, Rut: %d, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
+        if (strcmp(actual->Estado,"Pendiente") == 0)printf("ID: %d, Rut: %d, Nombre: %s, Hora: %s, Prioridad: %d\n",actual->ID, actual->rut, actual->name, actual->hora, actual->prioridad);
         actual = list_next(tickets);
         }
     }
 }
 
 void modificar_ticket(List *tickets) {
+  if (list_firts(tickets) == NULL) {
+      printf("No hay pacientes en espera.\n");
+      return;
+  }
+
+  int idTicket;
+  printf("Ingrese el ID del ticket a modificar: ");
+  scanf(" %d", &idTicket);
+
+  tipoTicket *actual = list_firts(tickets);
+  while (actual != NULL) {
+      if (actual->ID == idTicket) {
+          printf("Modificar Ticket ID: %d\n", actual->ID);
+          printf("Ingresar nueva prioridad(2 para media y 3 para alta): ");
+          int nuevaPrioridad;
+          scanf(" %d", &nuevaPrioridad);
+
+          // Elimina el nodo actual de la lista
+          tipoTicket *ticketModificado = pop_current(tickets);
+
+          // Actualiza la prioridad del ticket
+          ticketModificado->prioridad = nuevaPrioridad;
+
+          // Inserta el nodo en la posición correcta según la prioridad
+          tipoTicket *aux = list_firts(tickets);
+          if (ticketModificado->prioridad > aux->prioridad) {push_front(tickets, ticketModificado); return;}
+          while (aux != NULL && aux->prioridad >= ticketModificado->prioridad) {
+              aux = list_next(tickets);
+          }
+
+          if (aux == NULL) {
+              // Si no hay un nodo con menor prioridad, inserta al final
+              push_back(tickets, ticketModificado);
+          } else {
+              // Inserta antes del nodo actual
+              list_prev(tickets);
+              push_current(tickets, ticketModificado);
+          }
+
+          printf("El ticket ha sido modificado y reordenado según su prioridad.\n");
+          return;
+      }
+      actual = list_next(tickets);
+  }
+
+  printf("No se encontró un ticket con el ID especificado.\n");
+}
+
+/*void modificar_ticket(List *tickets) {
     if (list_firts(tickets) == NULL) {
         printf("No hay pacientes en espera.\n");
         return;
@@ -104,7 +153,7 @@ void modificar_ticket(List *tickets) {
             actual = list_next(tickets);
         }
     }
-}
+}*/
 
 
 int main() {
@@ -120,7 +169,7 @@ int main() {
         registrar_paciente(Tickets);
         break;
       case '2':
-        modificar_ticket(Tickets); 
+        modificar_ticket(Tickets); // trabajar con dos listas para tenre una con el orden original y otra con el orden por prioridad..
         // Lógica para asignar prioridad
         break;
       case '3':
