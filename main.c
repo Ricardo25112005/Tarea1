@@ -71,11 +71,11 @@ void registrar_ticket(List *tickets) {
   
 void mostrar_lista_tickets(List *tickets) {
     if (list_firts(tickets) == NULL) {
-        printf("No hay pacientes en espera.\n");
+        printf("No hay tickets en espera.\n");
         return;
     }
     else{
-        printf("Pacientes en espera: \n");
+        printf("Tickets en espera: \n");
         tipoTicket *actual = list_firts(tickets);
         while (actual != NULL) {
         if (strcmp(actual->Estado,"Pendiente") == 0)printf("ID: %d, Rut: %d, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
