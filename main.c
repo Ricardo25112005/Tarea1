@@ -51,7 +51,7 @@ void obtenerHoraActual(char *hora) {
 void registrar_ticket(List *tickets) {
     tipoTicket *auxiliar = malloc(sizeof(tipoTicket));
     if (auxiliar == NULL) {
-      printf("Error: No se pudo asignar memoria.\n");
+     printf("Error: No se pudo asignar memoria.\n");
       return;
     }
     printf("Registrar nuevo paciente\n");
@@ -143,6 +143,23 @@ void mostrar_lista_prioridad(List *tickets) {
     }
 }
 
+void atender_ticket(List *tickets) {
+    if (list_firts(tickets) == NULL) {
+        printf("No hay Tickets en espera.\n");
+        return;
+    }
+    tipoTicket *actual = list_firts(tickets);
+    while (actual != NULL) {
+        if (strcmp(actual->Estado,"Pendiente") == 0){
+            printf("Atendiendo Ticket ID: %d, Rut: %d, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
+            strcpy(actual->Estado, "Atendido"); 
+            return;
+        }
+        actual = list_next(tickets);
+    }
+    printf("No hay Tickets pendientes para atender.\n");
+}
+
 
 int main() {
     char opcion;
@@ -164,6 +181,7 @@ int main() {
         mostrar_lista_tickets(Tickets);
         break;
       case '4':
+        atender_ticket(Tickets);
         // Lógica para atender al siguiente ticket
         break;
       case '5':
@@ -172,6 +190,12 @@ int main() {
         break;
       case '6':
         puts("Saliendo del sistema de gestión de Tickets...");
+        if (Tickets != NULL) {
+          cleanList(Tickets);
+          free(Tickets);
+          Tickets = NULL; // Asegúrate de que el puntero sea NULL después de liberarlo
+        }
+        exit(0);
         break;
       default:
         puts("Opción no válida. Por favor, intente de nuevo.");
@@ -179,7 +203,7 @@ int main() {
       presioneTeclaParaContinuar();
   
     } while (opcion != '6');
-    cleanList(Tickets); // prueba numero 1
+    //cleanList(Tickets); // prueba numero 1
   
     return 0;
 }

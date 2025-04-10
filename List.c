@@ -97,7 +97,7 @@ void * push_current(List * list, void * ticket){
 }
 
 void * pop_front(List *list) {
-    list->current = list->tail;
+    list->current = list->head;
     return pop_current(list);
 }
 
@@ -107,7 +107,7 @@ void * pop_back(List *list) {
 }
 
 void * pop_current(List *list) {
-    if (list->head == NULL) return NULL;
+    if (list->head == NULL || list->current == NULL) return NULL;
     void * ticket = list->current->ticket;
     Node *nodo_eliminar = list->current;
     if (list->current == list->head){
@@ -135,4 +135,5 @@ void  cleanList(List * list) {
     while (list->head != NULL) {
         pop_front(list);
     }
+    list->current = NULL;
 }
