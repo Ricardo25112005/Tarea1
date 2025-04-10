@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <time.h>
 #include "list.h"
 
 //codigo para ejecutar el programa.    gcc -o tarea1 main.c list.c 
 typedef struct{
-    int ID;
-    int rut;
+    unsigned long long ID;
+    unsigned long long rut;
     char name[31];
     int prioridad;
     char hora[6];
@@ -48,19 +49,61 @@ void obtenerHoraActual(char *hora) {
   strftime(hora, 6, "%H:%M", tm_info);
 }
 
+int esNumero(const char *cadena) {
+  for (int i = 0; cadena[i] != '\0'; i++) {
+      if (!isdigit(cadena[i])) {
+          return 0; 
+      }
+  }
+  return 1;
+}
+
+unsigned long long leerID() {
+  char entrada[100];
+  char *endptr; // Puntero para detectar errores en strtol
+  unsigned long long id;
+
+  while (1) {
+      printf("Ingrese un ID: ");
+      scanf("%s", entrada);
+      id = strtol(entrada, &endptr, 10);
+      if (*endptr == '\0' && id > 0) { // Asegura que toda la cadena sea un número y que sea positivo
+          return id;
+      } else {
+          printf("Entrada inválida. Por favor, ingrese un ID válido (numérico y positivo).\n");
+      }
+  }
+}
+
+unsigned long long leerRut() {
+  char entrada[100];
+  char *endptr; // Puntero para detectar errores en strtol
+  unsigned long long id;
+
+  while (1) {
+      printf("Ingrese un rut (sin puntos ni digito verificador): ");
+      scanf("%s", entrada);
+      id = strtol(entrada, &endptr, 10);
+      if (*endptr == '\0' && id > 0) { // Asegura que toda la cadena sea un número y que sea positivo
+          return id;
+      } else {
+          printf("Entrada inválida. Por favor, ingrese un rut válido (numérico y positivo).\n");
+      }
+  }
+}
+
 void registrar_ticket(List *tickets) {
     tipoTicket *auxiliar = malloc(sizeof(tipoTicket));
     if (auxiliar == NULL) {
      printf("Error: No se pudo asignar memoria.\n");
       return;
     }
+    limpiarPantalla();
     printf("Registrar nuevo paciente\n");
-    printf("Ingresar Id: ");
-    scanf(" %d", &auxiliar->ID);
-    printf("Ingresar Rut(sin puntos ni digito verificador): ");
-    scanf(" %d", &auxiliar->rut);
+    auxiliar->ID = leerID();
+    auxiliar->rut = leerRut();
     printf("Ingresar nombre del cliente: ");
-    scanf(" %s", auxiliar->name);
+    scanf(" %30s", auxiliar->name);
     getchar();
     obtenerHoraActual(auxiliar->hora);
     auxiliar->prioridad = 1;
@@ -70,6 +113,7 @@ void registrar_ticket(List *tickets) {
 }
   
 void mostrar_lista_tickets(List *tickets) {
+    limpiarPantalla();
     if (list_firts(tickets) == NULL) {
         printf("No hay tickets en espera.\n");
         return;
@@ -78,13 +122,14 @@ void mostrar_lista_tickets(List *tickets) {
         printf("Tickets en espera: \n");
         tipoTicket *actual = list_firts(tickets);
         while (actual != NULL) {
-        if (strcmp(actual->Estado,"Pendiente") == 0)printf("ID: %d, Rut: %d, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
+        if (strcmp(actual->Estado,"Pendiente") == 0)printf("ID: %llu, Rut: %llu, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
         actual = list_next(tickets);
         }
     }
 }
 
 void modificar_ticket(List *tickets) {
+  limpiarPantalla();
   if (list_firts(tickets) == NULL) {
       printf("No hay tickets en espera.\n");
       return;
@@ -129,6 +174,7 @@ void modificar_ticket(List *tickets) {
 }
 
 void mostrar_lista_prioridad(List *tickets) {
+    limpiarPantalla();
     if (list_firts(tickets) == NULL) {
         printf("No hay tickets Registrados.\n");
         return;
@@ -137,13 +183,14 @@ void mostrar_lista_prioridad(List *tickets) {
         printf("Tickets por prioridad: \n");
         tipoTicket *actual = list_firts(tickets);
         while (actual != NULL) {
-            printf("ID: %d, Rut: %d, Nombre: %s, Hora: %s, Estado: %s, Prioridad: %d\n",actual->ID, actual->rut, actual->name, actual->hora, actual->Estado, actual->prioridad);
+            printf("ID: %llu, Rut: %llu, Nombre: %s, Hora: %s, Estado: %s, Prioridad: %d\n",actual->ID, actual->rut, actual->name, actual->hora, actual->Estado, actual->prioridad);
             actual = list_next(tickets);
         }
     }
 }
 
 void atender_ticket(List *tickets) {
+    limpiarPantalla();
     if (list_firts(tickets) == NULL) {
         printf("No hay Tickets en espera.\n");
         return;
@@ -151,7 +198,7 @@ void atender_ticket(List *tickets) {
     tipoTicket *actual = list_firts(tickets);
     while (actual != NULL) {
         if (strcmp(actual->Estado,"Pendiente") == 0){
-            printf("Atendiendo Ticket ID: %d, Rut: %d, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
+            printf("Atendiendo Ticket ID: %llu, Rut: %llu, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
             strcpy(actual->Estado, "Atendido"); 
             return;
         }
@@ -190,12 +237,12 @@ int main() {
         break;
       case '6':
         puts("Saliendo del sistema de gestión de Tickets...");
-        if (Tickets != NULL) {
+        /*if (Tickets != NULL) {
           cleanList(Tickets);
           free(Tickets);
           Tickets = NULL; // Asegúrate de que el puntero sea NULL después de liberarlo
         }
-        exit(0);
+        exit(0);*/
         break;
       default:
         puts("Opción no válida. Por favor, intente de nuevo.");
@@ -203,7 +250,7 @@ int main() {
       presioneTeclaParaContinuar();
   
     } while (opcion != '6');
-    //cleanList(Tickets); // prueba numero 1
+    cleanList(Tickets); // prueba numero 1
   
     return 0;
 }
