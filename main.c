@@ -86,7 +86,7 @@ void mostrar_lista_tickets(List *tickets) {
 
 void modificar_ticket(List *tickets) {
   if (list_firts(tickets) == NULL) {
-      printf("No hay pacientes en espera.\n");
+      printf("No hay tickets en espera.\n");
       return;
   }
 
