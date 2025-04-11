@@ -1,4 +1,6 @@
-Implementando una Lista
+Sistema de gestion de Tickets
+=====
+
 Antes de comenzar
 
 Importe el repositorio desde su cuenta en repl.it (si no tiene siga este tutorial)
