@@ -97,8 +97,17 @@ void * push_current(List * list, void * ticket){
 }
 
 void * pop_front(List *list) {
-    list->current = list->head;
-    return pop_current(list);
+    if (list == NULL || list->head == NULL) {
+        return NULL; // Lista vacía o no inicializada
+    }
+    Node *temp = list->head;
+    list->head = list->head->next;
+    if (list->head == NULL) {
+    list->tail = NULL; // La lista ahora está vacía
+    }
+    void *data = temp->ticket;
+    free(temp);
+    return data;
 }
 
 void * pop_back(List *list) {
@@ -107,28 +116,24 @@ void * pop_back(List *list) {
 }
 
 void * pop_current(List *list) {
-    if (list == NULL || list->head == NULL || list->current == NULL) return NULL;
-    void * ticket = list->current->ticket;
-    Node *nodo_eliminar = list->current;
-    if (list->current == list->head){
-        list->head = list->head->next;
-        list->current = list->head;
-        list->head->prev = NULL;
+    if (list == NULL || list->current == NULL) {
+        return NULL; // Lista no inicializada o current no definido
     }
-    else if (list->current == list->tail){
-        list->tail = list->tail->prev;
-        list->current = list->tail;
-        list->tail->next = NULL;
+    if (list->current == list->head) {
+        return pop_front(list);
     }
-    else{
-        Node * izq = list->current->prev;
-        Node * der = list->current->next;
-        izq->next = der;
-        der->prev = izq;
-        list->current = der;
+    Node *temp = list->head;
+    while (temp != NULL && temp->next != list->current) {
+        temp = temp->next;
     }
-    free(nodo_eliminar);
-    return ticket;
+    temp->next = list->current->next;
+    if (list->current == list->tail) {
+        list->tail = temp; // Actualizar tail si se elimina el último elemento
+    }
+    void *data = list->current->ticket;
+    free(list->current);
+    list->current = temp->next;
+    return data;
 }
 
 void  cleanList(List * list) {
