@@ -3,13 +3,14 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <stdbool.h>
 #include "list.h"
 
 //codigo para ejecutar el programa.    gcc -o tarea1 main.c list.c 
 typedef struct{
     unsigned long long ID;
     unsigned long long rut;
-    char name[121];
+    char nombre[121];
     int prioridad;
     char hora[6];
     char Estado[10];
@@ -58,7 +59,21 @@ int esNumero(const char *cadena) {
   return 1;
 }
 
-unsigned long long leerID() {
+bool idRepetido(List *tickets, unsigned long long id) {
+  if (list_firts(tickets) == NULL) {
+      return false;
+  }
+  tipoTicket *actual = list_firts(tickets);
+  while (actual != NULL) {
+      if (actual->ID == id) {
+          return true;
+      }
+      actual = list_next(tickets);
+  }
+  return false;
+}
+
+unsigned long long leerID(List *tickets) {
   char entrada[100];
   char *endptr; // Puntero para detectar errores en strtol
   unsigned long long id;
@@ -67,7 +82,11 @@ unsigned long long leerID() {
       printf("Ingrese un ID: ");
       scanf("%s", entrada);
       id = strtol(entrada, &endptr, 10);
-      if (*endptr == '\0' && id > 0) { // Asegura que toda la cadena sea un número y que sea positivo
+      if (idRepetido(tickets, id) == true) {
+        printf("El ID ya existe. Por favor, ingrese un ID diferente.\n");
+        continue;
+      }
+      if (*endptr == '\0' && id > 0) { // Asegura que toda la cadena sea un número, que sea positivo y que no este repetido
           return id;
       } else {
           printf("Entrada inválida. Por favor, ingrese un ID válido (numérico y positivo).\n");
@@ -92,6 +111,23 @@ unsigned long long leerRut() {
   }
 }
 
+bool existenPendientes(List *tickets) {
+    if (list_firts(tickets) == NULL) {
+        printf("No hay tickets en espera.\n");
+        return false;
+    }
+    long long contadorEspera = 0;
+    tipoTicket *actual = list_firts(tickets);
+    while (actual != NULL) {
+      if (strcmp(actual->Estado,"Pendiente") == 0) {contadorEspera++;}
+      actual = list_next(tickets);
+    }
+    if (contadorEspera == 0) {
+      return false;
+    }
+    return true;
+}
+
 void registrar_ticket(List *tickets) {
     tipoTicket *auxiliar = malloc(sizeof(tipoTicket));
     if (auxiliar == NULL) {
@@ -100,10 +136,10 @@ void registrar_ticket(List *tickets) {
     }
     limpiarPantalla();
     printf("Registrar nuevo paciente\n");
-    auxiliar->ID = leerID();
+    auxiliar->ID = leerID(tickets);
     auxiliar->rut = leerRut();
     printf("Ingresar nombre del cliente: ");
-    scanf(" %120s", auxiliar->name);
+    scanf(" %120s", auxiliar->nombre);
     getchar();
     obtenerHoraActual(auxiliar->hora);
     auxiliar->prioridad = 1;
@@ -112,27 +148,21 @@ void registrar_ticket(List *tickets) {
     // Aquí implementarías la lógica para registrar un nuevo paciente
 }
   
-void mostrar_lista_tickets(List *tickets) {
+void mostrar_lista_Pendientes(List *tickets) {
     limpiarPantalla();
     if (list_firts(tickets) == NULL) {
         printf("No hay tickets en espera.\n");
         return;
     }
     else{
-        long long contadorEspera = 0;
-        tipoTicket *actual1 = list_firts(tickets);
-        while (actual1 != NULL) {
-          if (strcmp(actual1->Estado,"Pendiente") == 0) contadorEspera++;
-          actual1 = list_next(tickets);
-        }
-        if (contadorEspera == 0) {
+        if (existenPendientes(tickets) == false) {
           printf("No hay tickets pendientes.\n");
           return;
         }
         printf("Tickets en espera: \n");
         tipoTicket *actual = list_firts(tickets);
         while (actual != NULL) {
-        if (strcmp(actual->Estado,"Pendiente") == 0)printf("ID: %llu, Rut: %llu, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
+        if (strcmp(actual->Estado,"Pendiente") == 0)printf("ID: %llu, Rut: %llu, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->nombre, actual->hora);
         actual = list_next(tickets);
         }
     }
@@ -144,25 +174,37 @@ void modificar_ticket(List *tickets) {
       printf("No hay tickets en espera.\n");
       return;
   }
-  int idTicket;
+  if (existenPendientes(tickets) == false) {
+    printf("No hay tickets pendientes.\n");
+    return;
+  }
+  mostrar_lista_Pendientes(tickets);
+  unsigned long long idTicket;
   printf("Ingrese el ID del ticket a modificar: ");
-  scanf(" %d", &idTicket);
+  scanf(" %llu", &idTicket);
   tipoTicket *actual = list_firts(tickets);
   while (actual != NULL) {
       if (actual->ID == idTicket) {
+          limpiarPantalla();
           if (strcmp(actual->Estado,"Pendiente") != 0) {
               printf("El ticket no está en estado pendiente y no se puede modificar.\n");
               return;
           }
-          printf("Modificar Ticket ID: %d\n", actual->ID);
-          printf("Ingresar nueva prioridad(2 para media y 3 para alta): ");
+          printf("Modificar Ticket ID: %llu\n", actual->ID);
+          printf("Prioridad actual: %d\n", actual->prioridad);
+          printf("Ingresar nueva prioridad(1 para Baja, 2 para media y 3 para alta): ");
           int nuevaPrioridad;
           scanf(" %d", &nuevaPrioridad);
-          // Elimina el nodo actual de la lista
+          if (nuevaPrioridad < 1 || nuevaPrioridad > 3) {
+              printf("Prioridad inválida. Debe ser 1, 2 o 3.\n");
+              return;
+          }
+          if (nuevaPrioridad == actual->prioridad) {
+              printf("La prioridad no ha cambiado.\n");
+              return;
+          }
           tipoTicket *ticketModificado = pop_current(tickets);
-          // Actualiza la prioridad del ticket
           ticketModificado->prioridad = nuevaPrioridad;
-          // Inserta el nodo en la posición correcta según la prioridad
           if (list_firts(tickets) == NULL) {
             push_front(tickets, ticketModificado);
             printf("El ticket ha sido modificado y reinsertado como único elemento en la lista.\n");
@@ -199,7 +241,7 @@ void mostrar_lista_prioridad(List *tickets) {
         printf("Tickets por prioridad: \n");
         tipoTicket *actual = list_firts(tickets);
         while (actual != NULL) {
-            printf("ID: %llu, Rut: %llu, Nombre: %s, Hora: %s, Estado: %s, Prioridad: %d\n",actual->ID, actual->rut, actual->name, actual->hora, actual->Estado, actual->prioridad);
+            printf("ID: %llu, Rut: %llu, Nombre: %s, Hora: %s, Estado: %s, Prioridad: %d\n",actual->ID, actual->rut, actual->nombre, actual->hora, actual->Estado, actual->prioridad);
             actual = list_next(tickets);
         }
     }
@@ -214,7 +256,7 @@ void atender_ticket(List *tickets) {
     tipoTicket *actual = list_firts(tickets);
     while (actual != NULL) {
         if (strcmp(actual->Estado,"Pendiente") == 0){
-            printf("Atendiendo Ticket ID: %llu, Rut: %llu, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->name, actual->hora);
+            printf("Atendiendo Ticket ID: %llu, Rut: %llu, Nombre: %s, Hora: %s\n",actual->ID, actual->rut, actual->nombre, actual->hora);
             strcpy(actual->Estado, "Atendido"); 
             return;
         }
@@ -241,7 +283,7 @@ int main() {
         // Lógica para asignar prioridad
         break;
       case '3':
-        mostrar_lista_tickets(Tickets);
+        mostrar_lista_Pendientes(Tickets);
         break;
       case '4':
         atender_ticket(Tickets);
