@@ -1,31 +1,26 @@
 Sistema de gestion de Tickets
 =====
 
-Antes de comenzar
-
-Importe el repositorio desde su cuenta en repl.it (si no tiene siga este tutorial)
-Sólo puede modificar los archivos list.c y main.c
-Para testear sus códigos basta con que apriete el botón Run
-Si no funciona el botón Run puede abrir un terminal (shell) y ejecutar el comando ./test.sh
-Verifique que sus cambios se hayan subido a este repositorio
-No está permitido usar comandos de git (a menos que el profesor o ayudantes lo indiquen)
-En este laboratorio implementaremos una lista. Para ello usaremos la siguiente estructura (lista enlazada doble):
-
+Para esta Programa de gestion de tickets se implementara una **lista** para organizar los tickets que se van registrando y en caso de modificar su prioridad mpverlos a donde sea necesario, esto utilizando la siguiente estructura (ListaEnlazada Doble):
+````c
 typedef struct Node Node;
+typedef struct List List;
 
-struct Node {
-    void * data; // Puntero al dato
-    Node * next; // Puntero al siguiente nodo
-    Node * prev; // Puntero al nodo previo
+struct Node{
+    void * ticket; 
+    Node * next;
+    Node * prev;
 };
 
-typedef struct {
-    Node * head; // Puntero al primer elemento
-    Node * tail; // Puntero al ultimo elemento
-    Node * current; // Puntero para poder recorrer la lista
-} List;
-Si tiene dudas o no sabe como funciona una lista enlazada, puede ver esta presentación, revisar este libro, buscar en internet o preguntar.
+struct List{
+    Node * head;
+    Node * tail;
+    Node * current;
+};
+````
+Este programa tiene como finalidad crear una cola de tickets ordenados con prioridad y por orden de registro, modificando la prioridad de los tickets, mostrando la lista de pendientes y mostrando la lista ordenada por prioridad devidido en 5 secciones: 
 
+1. Registro de ticket: en esta parte se llama a la funcion `void registrar_ticket(List * tickets)`, funcion la cual recive la lista de tickets y lee es id a travez de una funcion llamada `unsigned long long leerID(List * tickets)`
 Ejercicios
 Programe la función List* createList(), la cual retorna el puntero del tipo de dato List con sus valores inicializados en NULL.
 Recuerda reservar memoria al puntero usando malloc o calloc.
