@@ -81,6 +81,7 @@ unsigned long long leerID(List *tickets) {
   while (1) {
       printf("Ingrese un ID: ");
       scanf("%s", entrada);
+      getchar(); 
       id = strtol(entrada, &endptr, 10);
       if (idRepetido(tickets, id) == true) {
         printf("El ID ya existe. Por favor, ingrese un ID diferente.\n");
@@ -102,6 +103,7 @@ unsigned long long leerRut() {
   while (1) {
       printf("Ingrese un rut (sin puntos ni digito verificador): ");
       scanf("%s", entrada);
+      getchar();
       id = strtol(entrada, &endptr, 10);
       if (*endptr == '\0' && id > 0) { // Asegura que toda la cadena sea un número y que sea positivo
           return id;
@@ -139,8 +141,8 @@ void registrar_ticket(List *tickets) {
     auxiliar->ID = leerID(tickets);
     auxiliar->rut = leerRut();
     printf("Ingresar nombre del cliente: ");
-    scanf(" %120s", auxiliar->nombre);
-    getchar();
+    fgets(auxiliar->nombre, 121, stdin);
+    auxiliar->nombre[strcspn(auxiliar->nombre, "\n")] = 0;
     obtenerHoraActual(auxiliar->hora);
     auxiliar->prioridad = 1;
     strcpy(auxiliar->Estado, "Pendiente"); 
@@ -184,51 +186,53 @@ void modificar_ticket(List *tickets) {
   scanf(" %llu", &idTicket);
   tipoTicket *actual = list_firts(tickets);
   while (actual != NULL) {
-      if (actual->ID == idTicket) {
-          limpiarPantalla();
-          if (strcmp(actual->Estado,"Pendiente") != 0) {
-              printf("El ticket no está en estado pendiente y no se puede modificar.\n");
-              return;
-          }
-          printf("Modificar Ticket ID: %llu\n", actual->ID);
-          printf("Prioridad actual: %d\n", actual->prioridad);
-          printf("Ingresar nueva prioridad(1 para Baja, 2 para media y 3 para alta): ");
-          int nuevaPrioridad;
-          scanf(" %d", &nuevaPrioridad);
-          if (nuevaPrioridad < 1 || nuevaPrioridad > 3) {
-              printf("Prioridad inválida. Debe ser 1, 2 o 3.\n");
-              return;
-          }
-          if (nuevaPrioridad == actual->prioridad) {
-              printf("La prioridad no ha cambiado.\n");
-              return;
-          }
-          tipoTicket *ticketModificado = pop_current(tickets);
-          ticketModificado->prioridad = nuevaPrioridad;
-          if (list_firts(tickets) == NULL) {
-            push_front(tickets, ticketModificado);
-            printf("El ticket ha sido modificado y reinsertado como único elemento en la lista.\n");
+    if (actual->ID == idTicket) {
+        limpiarPantalla();
+        if (strcmp(actual->Estado, "Pendiente") != 0) {
+            printf("El ticket no está en estado pendiente y no se puede modificar.\n");
             return;
-          }
-          tipoTicket *aux = list_firts(tickets);
-          if (ticketModificado->prioridad > aux->prioridad) {push_front(tickets, ticketModificado); return;}
-          while (aux != NULL && aux->prioridad >= ticketModificado->prioridad) {
-              aux = list_next(tickets);
-          }
-          if (aux == NULL) {
-              // Si no hay un nodo con menor prioridad, inserta al final
-              push_back(tickets, ticketModificado);
-          } else {
-              // Inserta antes del nodo actual
-              list_prev(tickets);
-              push_current(tickets, ticketModificado);
-          }
-          printf("El ticket ha sido modificado y reordenado según su prioridad.\n");
-          return;
-      }
-      actual = list_next(tickets);
-  }
-  printf("No se encontró un ticket con el ID especificado.\n");
+        }
+        printf("Modificar Ticket ID: %llu\n", actual->ID);
+        printf("Prioridad actual: %d\n", actual->prioridad);
+        printf("Ingresar nueva prioridad (1 para Baja, 2 para Media y 3 para Alta): ");
+        int nuevaPrioridad;
+        scanf(" %d", &nuevaPrioridad);
+        if (nuevaPrioridad < 1 || nuevaPrioridad > 3) {
+            printf("Prioridad inválida. Debe ser 1, 2 o 3.\n");
+            return;
+        }
+        if (nuevaPrioridad == actual->prioridad) {
+            printf("La prioridad no ha cambiado.\n");
+            return;
+        }
+        tipoTicket *ticketModificado = pop_current(tickets);
+        ticketModificado->prioridad = nuevaPrioridad;
+        if (list_firts(tickets) == NULL) {
+            push_front(tickets, ticketModificado);
+        } else {
+            tipoTicket *aux = list_firts(tickets);
+            if (ticketModificado->prioridad > aux->prioridad) {
+                push_front(tickets, ticketModificado);
+            } else {
+                while (aux != NULL && aux->prioridad >= ticketModificado->prioridad) {
+                    aux = list_next(tickets);
+                }
+                if (aux == NULL) {
+                    // Si no hay un nodo con menor prioridad, inserta al final
+                    push_back(tickets, ticketModificado);
+                } else {
+                    // Inserta antes del nodo actual
+                    list_prev(tickets);
+                    push_current(tickets, ticketModificado);
+                }
+            }
+        }
+        printf("El ticket ha sido modificado y reordenado según su prioridad.\n");
+        return;
+    }
+    actual = list_next(tickets);
+}
+printf("No se encontró un ticket con el ID especificado.\n");
 }
 
 void mostrar_lista_prioridad(List *tickets) {
