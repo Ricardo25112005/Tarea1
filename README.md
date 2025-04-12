@@ -19,7 +19,7 @@ struct List{
 };
 ````
 ---
-Este programa tiene como finalidad crear una cola de tickets ordenados con prioridad y por orden de registro, modificando la prioridad de los tickets, mostrando la lista de pendientes y mostrando la lista ordenada por prioridad devidido en 5 secciones: 
+Este programa tiene como finalidad crear una cola de tickets ordenados con prioridad y por orden de registro,registrando cada ticket, modificando la prioridad de los tickets, mostrando la lista de pendientes, procesar el siguiente ticket de la listade pendientes y mostrando la lista ordenada por prioridad devidido en 5 secciones: 
 
 1. Registro de ticket: en esta parte se llama a la funcion `void registrar_ticket(List * tickets)`, funcion la cual recive la lista de tickets, crea un auxiliar al cual se lee el id a travez de una funcion llamada `unsigned long long leerID(List * tickets)` la cual lee el ID en formato de string y verifica que sea numerica, en caso de no ser numerica se pide que se ingrese un ID numerico o en caso de ya existir ese ID en la lista se pide que se reingrense un ID diferente. Lee el rut a travez de la funcion `unsigned long long leerRut()` la cual lee el rut en modo de string y verifica que sea un numero, en caso de no serlo se pide que se reingrese un rut valido. Se lee un numbre en formato string, y se lee la hora local del computador a travez de la funcion `void obtenerHoraActual(char * hora)`, lugeo se le asigna prioridad 1 y estado pendiente, para finalmente hacer un `push_back(List * tickets, tipoTicket * ticket)` para agregarlo al final de la lista.  
 2.
