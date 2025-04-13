@@ -49,20 +49,31 @@ void * list_next(List *list) {
 }
 
 void * list_prev(List *list){
-    if (list->current == NULL) return NULL;
-    if(list->current->prev != NULL){
-        list->current = list->current->prev;
-        return list->current->ticket;    
+    if (list == NULL || list->current == NULL || list->current->prev == NULL) return NULL; 
+    list->current = list->current->prev;
+    return list->current->ticket;
+}
+
+void push_back(List * list, void * ticket){
+    if (list == NULL) {
+      return; // Lista no inicializada
     }
-    return NULL;
+    Node *newNode = (Node *)malloc(sizeof(Node));
+    if (newNode == NULL) {
+      return; // Fallo en la asignación de memoria
+    }
+    newNode->ticket = ticket;
+    newNode->next = NULL;
+    if (list->tail == NULL) { // Si la lista está vacía
+      list->head = newNode;
+      list->tail = newNode;
+    } else {
+      list->tail->next = newNode;
+      list->tail = newNode;
+    }
 }
 
-void * push_back(List * list, void * ticket){
-    list->current = list->tail;
-    push_current(list, ticket);
-}
-
-void * push_front(List * list, void * ticket){
+void push_front(List * list, void * ticket){
     Node * nuevo = create_node(ticket);
     if (list->head != NULL){
         list->head->prev = nuevo;
@@ -76,34 +87,40 @@ void * push_front(List * list, void * ticket){
     }
 }
 
-void * push_current(List * list, void * ticket){
+void push_current(List * list, void * ticket){
     Node * nuevo = create_node(ticket);
-    if (list->head == NULL){
+    if (list == NULL || nuevo == NULL || list->current == NULL) return;
+    if (list->head == NULL) {
         list->head = nuevo;
         list->current = nuevo;
         list->tail = nuevo;
-    }
-    else if (list->current == list->tail){
+    } else if (list->current == list->tail) {
         list->tail->next = nuevo;
         nuevo->prev = list->tail;
         list->tail = nuevo;
-    }
-    else{
+    } else if (list->current != NULL) {
         nuevo->next = list->current->next;
         nuevo->prev = list->current;
-        list->current->next->prev = nuevo;
+        if (list->current->next != NULL) {
+            list->current->next->prev = nuevo;
+        }
         list->current->next = nuevo;
+    } else {
+        // Caso: list->current es NULL (error)
+        fprintf(stderr, "Error: list->current es NULL en push_current.\n");
+        free(nuevo);
+        return;
     }
 }
 
 void * pop_front(List *list) {
     if (list == NULL || list->head == NULL) {
-        return NULL; // Lista vacía o no inicializada
+        return NULL;
     }
     Node *temp = list->head;
     list->head = list->head->next;
     if (list->head == NULL) {
-    list->tail = NULL; // La lista ahora está vacía
+    list->tail = NULL;
     }
     void *data = temp->ticket;
     free(temp);
@@ -117,7 +134,7 @@ void * pop_back(List *list) {
 
 void * pop_current(List *list) {
     if (list == NULL || list->current == NULL) {
-        return NULL; // Lista no inicializada o current no definido
+        return NULL; 
     }
     if (list->current == list->head) {
         return pop_front(list);
@@ -128,13 +145,36 @@ void * pop_current(List *list) {
     }
     temp->next = list->current->next;
     if (list->current == list->tail) {
-        list->tail = temp; // Actualizar tail si se elimina el último elemento
+        list->tail = temp;
     }
     void *data = list->current->ticket;
     free(list->current);
-    list->current = temp->next;
+    list->current = NULL;
     return data;
 }
+void list_sortedInsert(List *L, void *data, int (*lower_than)(void *data1, void *data2)) {
+    if (L == NULL) {
+      return; // Lista no inicializada
+    }
+  
+    // Caso especial: inserción al principio o en lista vacía
+    if (L->head == NULL || lower_than(data, L->head->ticket)) {
+      push_front(L, data);
+      return;
+    }
+  
+    // Caso general: encontrar la posición correcta para insertar
+    Node *current = L->head;
+    while (current->next != NULL && !lower_than(data, current->next->ticket)) {
+      current = current->next;
+    }
+  
+    // Preparar para usar list_pushCurrent
+    L->current = current;
+  
+    // Insertar el nodo en la posición actual
+    push_current(L, data);
+  }
 
 void  cleanList(List * list) {
     while (list->head != NULL) {

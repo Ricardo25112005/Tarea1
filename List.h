@@ -11,17 +11,19 @@ void * list_next(List *list);
 
 void * list_prev(List *list);
 
-void * push_back(List * list, void * ticket);
+void  push_back(List * list, void * ticket);
 
-void * push_front(List * list, void * ticket);
+void  push_front(List * list, void * ticket);
 
-void * push_current(List * list, void * ticket);
+void  push_current(List * list, void * ticket);
 
 void * pop_front(List * list);
 
 void * pop_back(List * list);
 
 void * pop_current(List * list);   
+
+void list_sortedInsert(List *L, void *data, int (*lower_than)(void *data1, void *data2));
 
 void cleanList(List * list);
 
